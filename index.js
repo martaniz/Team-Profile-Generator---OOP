@@ -4,16 +4,18 @@ const generatePage = require('./src/page-tamplate.js');
 const Manager = require('./lib/Manager');
 const Intern = require('./lib/Intern');
 const Engineer = require('./lib/Engineer');
+const Employee = require('./lib/Manager');
+
+// const render = require("")    //html
 
 const teamMembers= []
 
-const managerQuestion= [
+const employeeQuestions= [
     {   
         type: "input",
         message: "What is your name?",
         name: "name"
-    },
-  
+    },  
     {   
       type: "input",
         message: "What is your ID number?",
@@ -23,81 +25,81 @@ const managerQuestion= [
       type: "input",
         message: "Please provide your email",
         name: "email"
-    },
-       {   
-        type: "input",
-          message: "What is your office number",
-          name: "officeNumber"
-      }
+    }
 ]
 
-const questions = [
-    {   
+const managerQuestion = {
+    type: "input",
+      message: "What is your office number",
+      name: "officeNumber"
+}
+
+const internQuestion = {   
         type: "input",
-        message: "What is your name?",
-        name: "name"
-    },
-  
-    {   
-      type: "input",
-        message: "What is your ID number?",
-        name: "id"
-    },
-    {  
-      type: "input",
-        message: "Please provide your email",
-        name: "email"
-    },
-   
-    {   
-      type: "input",
-        message: "what is your github name",
-        name: "github"
-    },
-    {   
-      type: "input",
-        message: "What is your school?",
-        name: "school"
-    }
-  ]
+          message: "What school is the intern from?",
+          name: "school",
+      }
+
+const engineerQuestion= 
+       {   
+        type: "input",
+          message: "What is the engineer's Github Username?",
+          name: "github",    
+      }
+
 
 function managerQuestions() {
-    inquirer.prompt(managerQuestion)
+  const managerQuestions = [...employeeQuestions]
+  managerQuestions.push(managerQuestion)
+    inquirer.prompt(managerQuestions)
     .then((answers => {
         const manager = new Manager(answers.name, answers.id, answers.email, answers.officeNumber);
         teamMembers.push(manager);
-        console.log(teamMembers)
-    }))
+    })
+    )
+    .then(internEngineer )
 }
 
 function internEngineer() {
     inquirer.prompt([
         {
             type: "list",
-            message: "what kind of employee would you like to add next?",
+            message: "what type of employee would you like to add next?",
             name: "intEng",
             choices: ['Intern', 'Engineer', 'none'],
         }
-    ]).then(answers => {
+    ])
+    
+    .then(answers => {
         if (answers.intEng === 'Intern') {
-            // ask intern questions
-            return this.intern;
+          const internQuestions = [...employeeQuestions]
+          internQuestions.push(internQuestion)
+            inquirer.prompt(internQuestions)
+            .then((answers => {
+              const intern = new Intern(answers.name, answers.id, answers.email, answers.school);
+              teamMembers.push(intern);
+            }
+               ))
+               .then(internEngineer)
+
+            
         } else if (answers.intEng === 'Engineer') {
-            // ask engineer question
+          const engineerQuestions = [...employeeQuestions]
+         engineerQuestions.push(engineerQuestion)
+            inquirer.prompt(engineerQuestions)
+            .then((answers => {
+              const engineer = new Engineer(answers.name, answers.id, answers.email, answers.github);
+              teamMembers.push(engineer);
+            }
+              ))
+          .then(internEngineer)
         } else {
             // make html file
+            console.log(teamMembers)
+            makeHTML(teamMembers);
         }
     })
-    
-}
-  function runQuestions() {
-      inquirer.prompt(questions)
-      .then((answers) => {
-          makeHTML(answers)
-          console.log(makeHTML(answers))
-      })
   }
-
   function makeHTML(data) {
       fs.writeFile('TeamProfile.html', generatePage(data), err => {
           if (err) throw err;
@@ -105,6 +107,7 @@ function internEngineer() {
       })
  };
  managerQuestions();
+ 
   //runQuestions();
  // create an array variable to hold the team members
   // ask manager questions
